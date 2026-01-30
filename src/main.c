@@ -7,7 +7,7 @@ int main() {
     int *top = arr_size - 1; // Initialize top to indicate empty stack
     while(1){
         int choice, value;
-        printf("1. Push\n2. Exit\nEnter your choice: ");
+        printf("1. Push\n2. Pop\n3. Display\n4. Exit\nEnter your choice: ");
         scanf("%d", &choice);
         switch(choice){
             case 1:
@@ -16,6 +16,12 @@ int main() {
                 push(arr_stack, arr_size, value, top);
                 break;
             case 2:
+                pop(arr_stack, arr_size, top);
+                break;
+            case 3:
+                display(arr_stack, arr_size, top);
+                break;
+            case 4:
                 free(arr_stack);
                 return 0;
             default:
