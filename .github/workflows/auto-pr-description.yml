@@ -1,0 +1,62 @@
+name: Auto-Generate PR Description
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  generate-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history to get all commits
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get PR changes
+        id: pr-info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get the base branch
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          # Get the diff
+          git fetch origin $BASE_BRANCH
+          DIFF=$(git diff origin/$BASE_BRANCH...HEAD)
+
+          # Get commit messages
+          COMMITS=$(git log origin/$BASE_BRANCH..HEAD --pretty=format:"%h - %s")
+
+          # Save to files for the next step
+          echo "$DIFF" > /tmp/pr-diff.txt
+          echo "$COMMITS" > /tmp/pr-commits.txt
+
+          # Get PR metadata
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+
+      - name: Generate PR description with Claude
+        id: generate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          node .github/scripts/generate-pr-description.js
+
+      - name: Update PR description
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DESCRIPTION=$(cat /tmp/generated-description.txt)
+
+          gh pr edit ${{ env.PR_NUMBER }} --body "$DESCRIPTION"
