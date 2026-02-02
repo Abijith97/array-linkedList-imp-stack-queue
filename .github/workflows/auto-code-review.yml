@@ -1,0 +1,67 @@
+name: Auto Code Review with Claude
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get PR changes
+        id: pr-info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get the base and head branches
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          # Get the diff with file names
+          git fetch origin $BASE_BRANCH
+          DIFF=$(git diff origin/$BASE_BRANCH...HEAD)
+
+          # Get list of changed files
+          FILES=$(git diff --name-only origin/$BASE_BRANCH...HEAD)
+
+          # Get commit messages
+          COMMITS=$(git log origin/$BASE_BRANCH..HEAD --pretty=format:"%h - %s")
+
+          # Save to files
+          echo "$DIFF" > /tmp/pr-diff.txt
+          echo "$FILES" > /tmp/changed-files.txt
+          echo "$COMMITS" > /tmp/pr-commits.txt
+
+          # Set environment variables
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+
+      - name: Perform code review with Claude
+        id: review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          node .github/scripts/code-review.js
+
+      - name: Post review comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          REVIEW=$(cat /tmp/code-review.txt)
+
+          gh pr comment ${{ env.PR_NUMBER }} --body "$REVIEW"
