@@ -1,10 +1,10 @@
 #include "include/array-stack.h"
 
-int main() {
+void main() {
     int arr_size;
     scanf("Enter size of stack: %d", &arr_size);
     int *arr_stack = (int *)malloc(arr_size * sizeof(int));
-    int *top = arr_size - 1; // Initialize top to indicate empty stack
+    int *top = -1; // Initialize top to indicate empty stack
     while(1){
         int choice, value;
         printf("1. Push\n2. Pop\n3. Display\n4. Exit\nEnter your choice: ");
@@ -23,10 +23,10 @@ int main() {
                 break;
             case 4:
                 free(arr_stack);
-                return 0;
+                free(top);
+                break;
             default:
                 printf("Invalid choice\n");
         }
     }
-    return 0;
 }
