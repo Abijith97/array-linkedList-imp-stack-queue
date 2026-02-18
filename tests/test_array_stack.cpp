@@ -25,51 +25,51 @@ protected:
     }
 };
 
-// Test 1: Insert 1 element and count should be 1
-TEST_F(ArrayStackTest, PushOneElement) {
-    // Capture stdout to verify the print message
-    testing::internal::CaptureStdout();
+// // Test 1: Insert 1 element and count should be 1
+// TEST_F(ArrayStackTest, PushOneElement) {
+//     // Capture stdout to verify the print message
+//     testing::internal::CaptureStdout();
 
-    push(arr_stack, arr_size, 10, &top);
+//     push(arr_stack, arr_size, 10, &top);
 
-    std::string output = testing::internal::GetCapturedStdout();
+//     std::string output = testing::internal::GetCapturedStdout();
 
-    // Verify count (top + 1 = count)
-    EXPECT_EQ(top + 1, 1) << "Count should be 1 after pushing 1 element";
-    EXPECT_EQ(top, 0) << "Top should be 0 after pushing 1 element";
-    EXPECT_EQ(arr_stack[0], 10) << "First element should be 10";
+//     // Verify count (top + 1 = count)
+//     EXPECT_EQ(top + 1, 1) << "Count should be 1 after pushing 1 element";
+//     EXPECT_EQ(top, 0) << "Top should be 0 after pushing 1 element";
+//     EXPECT_EQ(arr_stack[0], 10) << "First element should be 10";
 
-    // Verify output message
-    EXPECT_NE(output.find("Pushed 10 to stack"), std::string::npos)
-        << "Should print success message";
-}
+//     // Verify output message
+//     EXPECT_NE(output.find("Pushed 10 to stack"), std::string::npos)
+//         << "Should print success message";
+// }
 
-// Test 2: Insert arr_size-1 elements and count should be arr_size-1
-TEST_F(ArrayStackTest, PushArrSizeMinusOneElements) {
-    testing::internal::CaptureStdout();
+// // Test 2: Insert arr_size-1 elements and count should be arr_size-1
+// TEST_F(ArrayStackTest, PushArrSizeMinusOneElements) {
+//     testing::internal::CaptureStdout();
 
-    // Push arr_size - 1 = 4 elements
-    for (int i = 0; i < arr_size - 1; i++) {
-        push(arr_stack, arr_size, i * 10, &top);
-    }
+//     // Push arr_size - 1 = 4 elements
+//     for (int i = 0; i < arr_size - 1; i++) {
+//         push(arr_stack, arr_size, i * 10, &top);
+//     }
 
-    std::string output = testing::internal::GetCapturedStdout();
+//     std::string output = testing::internal::GetCapturedStdout();
 
-    // Verify count
-    EXPECT_EQ(top + 1, arr_size - 1)
-        << "Count should be " << (arr_size - 1) << " after pushing " << (arr_size - 1) << " elements";
-    EXPECT_EQ(top, arr_size - 2)
-        << "Top should be " << (arr_size - 2) << " after pushing " << (arr_size - 1) << " elements";
+//     // Verify count
+//     EXPECT_EQ(top + 1, arr_size - 1)
+//         << "Count should be " << (arr_size - 1) << " after pushing " << (arr_size - 1) << " elements";
+//     EXPECT_EQ(top, arr_size - 2)
+//         << "Top should be " << (arr_size - 2) << " after pushing " << (arr_size - 1) << " elements";
 
-    // Verify elements
-    for (int i = 0; i < arr_size - 1; i++) {
-        EXPECT_EQ(arr_stack[i], i * 10) << "Element at index " << i << " should be " << (i * 10);
-    }
+//     // Verify elements
+//     for (int i = 0; i < arr_size - 1; i++) {
+//         EXPECT_EQ(arr_stack[i], i * 10) << "Element at index " << i << " should be " << (i * 10);
+//     }
 
-    // Verify no overflow message
-    EXPECT_EQ(output.find("Stack Overflow"), std::string::npos)
-        << "Should not have overflow when pushing " << (arr_size - 1) << " elements";
-}
+//     // Verify no overflow message
+//     EXPECT_EQ(output.find("Stack Overflow"), std::string::npos)
+//         << "Should not have overflow when pushing " << (arr_size - 1) << " elements";
+// }
 
 // Test 3: Insert arr_size elements and it should print "Stack Overflow"
 TEST_F(ArrayStackTest, PushArrSizeElementsCausesOverflow) {

@@ -1,4 +1,4 @@
-#include "include/array-stack.h"
+#include "array-stack.h"
 
 void main() {
     int arr_size;
