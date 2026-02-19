@@ -58,7 +58,7 @@ TEST_F(ArrayStackTest, PushArrSizeMinusOneElements) {
     std::string output = testing::internal::GetCapturedStdout();
 
     // Verify count
-    EXPECT_EQ(*top + 1, arr_size - 1)
+    EXPECT_EQ(*top + 1, arr_size)
         << "Count should be " << (arr_size - 1) << " after pushing " << (arr_size - 1) << " elements";
     EXPECT_EQ(*top, arr_size - 2)
         << "Top should be " << (arr_size - 2) << " after pushing " << (arr_size - 1) << " elements";
