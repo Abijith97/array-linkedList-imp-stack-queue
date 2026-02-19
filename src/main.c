@@ -1,9 +1,17 @@
 #include "array-stack.h"
 
-void main() {
+int main() {
     int arr_size;
-    scanf("Enter size of stack: %d", &arr_size);
+    printf("Enter size of stack: ");
+    if (scanf("%d", &arr_size) != 1 || arr_size <= 0) {
+        printf("Invalid input\n");
+        return 1;
+    }
     int *arr_stack = (int *)malloc(arr_size * sizeof(int));
+    if (arr_stack == NULL) {
+        printf("Memory allocation failed\n");
+        return 1;
+    }
     int *top = (int *)malloc(sizeof(int));
     *top = -1; // Initialize top to indicate empty stack
     while(1){
@@ -25,9 +33,10 @@ void main() {
             case 4:
                 free(arr_stack);
                 free(top);
-                break;
+                return;
             default:
                 printf("Invalid choice\n");
         }
     }
+    return 0;
 }
