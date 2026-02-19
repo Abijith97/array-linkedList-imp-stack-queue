@@ -4,7 +4,7 @@
 
 void push(int *arr_stack, int arr_size, int value, int *top) {
     if (*top == (arr_size - 1)) {
-        fprintf(stderr, "Stack Overflow\n");
+        printf("Stack Overflow\n");
     }
     else{
         arr_stack[++(*top)] = value;
@@ -14,7 +14,7 @@ void push(int *arr_stack, int arr_size, int value, int *top) {
 
 void pop(int *arr_stack, int *top) {
     if(*top == -1){
-        fprintf(stderr, "Stack Underflow\n");
+        printf("Stack Underflow\n");
     }
     else{
         int popped_value = arr_stack[(*top)--];
