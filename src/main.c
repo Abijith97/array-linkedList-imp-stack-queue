@@ -12,8 +12,7 @@ int main() {
         printf("Memory allocation failed\n");
         return 1;
     }
-    int *top = (int *)malloc(sizeof(int));
-    *top = -1; // Initialize top to indicate empty stack
+    int top = -1; // Initialize top to indicate empty stack
     while(1){
         int choice, value;
         printf("1. Push\n2. Pop\n3. Display\n4. Exit\nEnter your choice: ");
@@ -22,18 +21,17 @@ int main() {
             case 1:
                 printf("Enter value to push: ");
                 scanf("%d", &value);
-                push(arr_stack, arr_size, value, top);
+                push(arr_stack, arr_size, value, &top);
                 break;
             case 2:
-                pop(arr_stack, arr_size, top);
+                pop(arr_stack, arr_size, &top);
                 break;
             case 3:
-                display(arr_stack, arr_size, top);
+                display(arr_stack, arr_size, &top);
                 break;
             case 4:
                 free(arr_stack);
-                free(top);
-                return;
+                return 0;
             default:
                 printf("Invalid choice\n");
         }

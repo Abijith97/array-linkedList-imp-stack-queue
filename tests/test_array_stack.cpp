@@ -73,11 +73,11 @@ TEST_F(ArrayStackTest, PushArrSizeMinusOneElements) {
         << "Should not have overflow when pushing " << (arr_size - 1) << " elements";
 }
 
-// Test 3: Insert arr_size elements and it should print "Stack Overflow"
+// Test 3: Insert arr_size+1 elements and it should print "Stack Overflow"
 TEST_F(ArrayStackTest, PushArrSizeElementsCausesOverflow) {
     testing::internal::CaptureStdout();
 
-    // Push arr_size = 5 elements (indices 0-4 are valid, 5th element causes overflow)
+    // Push arr_size = 6 elements (indices 0-4 are valid, 5th element causes overflow)
     for (int i = 0; i < arr_size+1; i++) {
         push(arr_stack, arr_size, i * 10, top);
     }
