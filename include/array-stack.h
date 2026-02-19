@@ -1,3 +1,6 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int push(int *arr_stack, int arr_size, int value, int *top);
+void push(int *arr_stack, int arr_size, int value, int *top);
+void pop(int *arr_stack, int arr_size, int *top);
+void display(int *arr_stack, int arr_size, int *top);
