@@ -34,7 +34,7 @@ TEST_F(ArrayStackTest, PushOneElement) {
 
     push(arr_stack, arr_size, 10, top);
 
-    std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStderr();
 
     // Verify count (top + 1 = count)
     EXPECT_EQ(*top + 1, 1) << "Count should be 1 after pushing 1 element";
@@ -55,7 +55,7 @@ TEST_F(ArrayStackTest, PushArrSizeMinusOneElements) {
         push(arr_stack, arr_size, i * 10, top);
     }
 
-    std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStderr();
 
     // Verify count
     EXPECT_EQ(*top + 1, arr_size - 1)
@@ -82,7 +82,7 @@ TEST_F(ArrayStackTest, PushArrSizeElementsCausesOverflow) {
         push(arr_stack, arr_size, i * 10, top);
     }
 
-    std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStderr();
 
     // After pushing arr_size elements:
     // - First arr_size-1 pushes succeed
@@ -108,9 +108,9 @@ TEST_F(ArrayStackTest, OverflowMessageExact) {
     }
 
     // Now try to push when stack is full
-    testing::internal::CaptureStdout();
+    testing::internal::CaptureStderr();
     push(arr_stack, arr_size, 999, top);
-    std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStderr();
 
     // Verify exact overflow message
     EXPECT_NE(output.find("Stack Overflow"), std::string::npos)
@@ -183,7 +183,7 @@ TEST_F(ArrayStackTest, PopBeyondEmptyPrintsUnderflow) {
     for (int i = 0; i < arr_size + 1; i++) {
         pop(arr_stack, top);
     }
-    std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStderr();
 
     // Verify underflow message appears
     EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
