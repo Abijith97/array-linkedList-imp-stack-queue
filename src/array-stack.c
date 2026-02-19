@@ -1,12 +1,11 @@
 #include "array-stack.h"
 
 void push(int *arr_stack, int arr_size, int value, int *top) {
-    if (*top == arr_size - 1) {
+    if (*top == (arr_size - 1)) {
         printf("Stack Overflow\n");
     }
     else{
         arr_stack[++(*top)] = value;
-        printf("top: %d\n", *top);
         printf("Pushed %d to stack\n", value);
     }
 }

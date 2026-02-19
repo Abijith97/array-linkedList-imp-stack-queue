@@ -4,7 +4,8 @@ void main() {
     int arr_size;
     scanf("Enter size of stack: %d", &arr_size);
     int *arr_stack = (int *)malloc(arr_size * sizeof(int));
-    int *top = -1; // Initialize top to indicate empty stack
+    int *top = (int *)malloc(sizeof(int));
+    *top = -1; // Initialize top to indicate empty stack
     while(1){
         int choice, value;
         printf("1. Push\n2. Pop\n3. Display\n4. Exit\nEnter your choice: ");
