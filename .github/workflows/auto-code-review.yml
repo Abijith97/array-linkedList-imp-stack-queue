@@ -1,8 +1,9 @@
 name: Auto Code Review with Claude
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Run Google Tests"]
+    types: [completed]
 
 permissions:
   pull-requests: write
@@ -10,6 +11,7 @@ permissions:
 
 jobs:
   code-review:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,9 +29,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Get the base and head branches
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+          HEAD_BRANCH="${{ github.event.workflow_run.head_branch }}"
+
+          PR_NUM=$(gh pr list --head "$HEAD_BRANCH" --json number -q '.[0].number')
+
+          # Get base branch from the PR
+          BASE_BRANCH=$(gh pr view $PR_NUM --json baseRefName -q .baseRefName)
 
           # Get the diff with file names
           git fetch origin $BASE_BRANCH
@@ -47,9 +52,9 @@ jobs:
           echo "$COMMITS" > /tmp/pr-commits.txt
 
           # Set environment variables
-          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
-          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=$PR_NUM" >> $GITHUB_ENV
+          echo "PR_TITLE=$(gh pr view $PR_NUM --json title -q .title)" >> $GITHUB_ENV
+          echo "PR_AUTHOR=$(gh pr view $PR_NUM --json author -q .author.login)" >> $GITHUB_ENV
 
       - name: Perform code review with Claude
         id: review

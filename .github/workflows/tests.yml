@@ -3,6 +3,8 @@ name: Run Google Tests
 on:
   push:
     branches: ['**']  # Run on all branches
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
