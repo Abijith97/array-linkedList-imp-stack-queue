@@ -17,12 +17,12 @@ protected:
         // Common setup for each test
         arr_size = 5;
         arr_stack = new int[arr_size];
-        top = (int*)malloc(sizeof(int));
+        top = new int;
         *top = -1; // Empty stack
     }
 
     void TearDown() override {
-        free(top);
+        delete top;
         delete[] arr_stack;
     }
 };

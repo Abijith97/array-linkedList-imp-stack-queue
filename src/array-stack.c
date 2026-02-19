@@ -1,4 +1,6 @@
 #include "array-stack.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 void push(int *arr_stack, int arr_size, int value, int *top) {
     if (*top == (arr_size - 1)) {

@@ -1,3 +1,0 @@
-## Description
-
-copilot:summary

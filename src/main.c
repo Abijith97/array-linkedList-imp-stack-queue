@@ -1,4 +1,6 @@
 #include "array-stack.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     int arr_size;
