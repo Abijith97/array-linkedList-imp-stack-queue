@@ -1,4 +1,6 @@
 #include "array-stack.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int main() {
     int arr_size;
@@ -24,7 +26,7 @@ int main() {
                 push(arr_stack, arr_size, value, &top);
                 break;
             case 2:
-                pop(arr_stack, arr_size, &top);
+                pop(arr_stack, &top);
                 break;
             case 3:
                 display(arr_stack, arr_size, &top);

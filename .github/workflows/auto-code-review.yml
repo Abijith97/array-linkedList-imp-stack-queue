@@ -1,8 +1,7 @@
 name: Auto Code Review with Claude
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_call:
 
 permissions:
   pull-requests: write
@@ -27,29 +26,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Get the base and head branches
+          PR_NUM="${{ github.event.pull_request.number }}"
           BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
 
-          # Get the diff with file names
           git fetch origin $BASE_BRANCH
           DIFF=$(git diff origin/$BASE_BRANCH...HEAD)
-
-          # Get list of changed files
           FILES=$(git diff --name-only origin/$BASE_BRANCH...HEAD)
-
-          # Get commit messages
           COMMITS=$(git log origin/$BASE_BRANCH..HEAD --pretty=format:"%h - %s")
 
-          # Save to files
           echo "$DIFF" > /tmp/pr-diff.txt
           echo "$FILES" > /tmp/changed-files.txt
           echo "$COMMITS" > /tmp/pr-commits.txt
 
-          # Set environment variables
-          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
-          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=$PR_NUM" >> $GITHUB_OUTPUT
+          echo "PR_TITLE=$(gh pr view $PR_NUM --json title -q .title)" >> $GITHUB_ENV
+          echo "PR_AUTHOR=$(gh pr view $PR_NUM --json author -q .author.login)" >> $GITHUB_ENV
 
       - name: Perform code review with Claude
         id: review
@@ -63,5 +54,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           REVIEW=$(cat /tmp/code-review.txt)
-
-          gh pr comment ${{ env.PR_NUMBER }} --body "$REVIEW"
+          gh pr comment ${{ steps.pr-info.outputs.PR_NUMBER }} --body "$REVIEW"

@@ -17,12 +17,12 @@ protected:
         // Common setup for each test
         arr_size = 5;
         arr_stack = new int[arr_size];
-        top = (int*)malloc(sizeof(int));
+        top = new int;
         *top = -1; // Empty stack
     }
 
     void TearDown() override {
-        free(top);
+        delete top;
         delete[] arr_stack;
     }
 };
@@ -118,4 +118,77 @@ TEST_F(ArrayStackTest, OverflowMessageExact) {
 
     // Verify the element was NOT added
     EXPECT_EQ(*top, arr_size - 1) << "Top should not change on overflow";
+}
+
+// Test: Pop 1 from full stack, popped element should match last pushed
+TEST_F(ArrayStackTest, PopFromFullStackMatchesLastPushed) {
+    // Push arr_size elements: 0, 10, 20, 30, 40
+    for (int i = 0; i < arr_size; i++) {
+        push(arr_stack, arr_size, i * 10, top);
+    }
+
+    int last_pushed = (arr_size - 1) * 10;
+
+    testing::internal::CaptureStdout();
+    pop(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Verify the popped element matches the last pushed
+    std::string expected = "Popped " + std::to_string(last_pushed) + " from stack";
+    EXPECT_NE(output.find(expected), std::string::npos)
+        << "Popped element should be " << last_pushed;
+
+    // Verify top decremented
+    EXPECT_EQ(*top, arr_size - 2) << "Top should decrement by 1 after pop";
+}
+
+// Test: Fill, empty, push 1, pop 1 — popped element matches last pushed
+TEST_F(ArrayStackTest, PopAfterRefillMatchesLastPushed) {
+    // Fill the stack
+    for (int i = 0; i < arr_size; i++) {
+        push(arr_stack, arr_size, i * 10, top);
+    }
+
+    // Empty the stack
+    for (int i = 0; i < arr_size; i++) {
+        pop(arr_stack, top);
+    }
+
+    // Push one new element
+    int new_value = 99;
+    push(arr_stack, arr_size, new_value, top);
+
+    testing::internal::CaptureStdout();
+    pop(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Verify the popped element matches the newly pushed value
+    std::string expected = "Popped " + std::to_string(new_value) + " from stack";
+    EXPECT_NE(output.find(expected), std::string::npos)
+        << "Popped element should be " << new_value;
+
+    // Stack should be empty again
+    EXPECT_EQ(*top, -1) << "Stack should be empty after popping the only element";
+}
+
+// Test: Push max capacity, pop max capacity + 1, last pop should print underflow
+TEST_F(ArrayStackTest, PopBeyondEmptyPrintsUnderflow) {
+    // Fill the stack
+    for (int i = 0; i < arr_size; i++) {
+        push(arr_stack, arr_size, i * 10, top);
+    }
+
+    // Pop arr_size + 1 times (one extra beyond empty)
+    testing::internal::CaptureStdout();
+    for (int i = 0; i < arr_size + 1; i++) {
+        pop(arr_stack, top);
+    }
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Verify underflow message appears
+    EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
+        << "Should print 'Stack Underflow' when popping from empty stack";
+
+    // Top should remain -1 (underflow should not corrupt state)
+    EXPECT_EQ(*top, -1) << "Top should stay -1 after underflow";
 }
