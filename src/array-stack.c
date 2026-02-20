@@ -23,14 +23,5 @@ void pop(int *arr_stack, int *top) {
 }
 
 void display(int *arr_stack, int arr_size, int *top) {
-    if(*top == -1){
-        printf("Stack Underflow\n");
-    }
-    else{
-        printf("Stack elements: ");
-        for(int i = *top; i >= 0; i--){
-            printf("%d ", arr_stack[i]);
-        }
-        printf("\n");
-    }
+    // will be implemented in future
 }
