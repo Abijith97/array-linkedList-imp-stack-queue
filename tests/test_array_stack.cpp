@@ -192,3 +192,63 @@ TEST_F(ArrayStackTest, PopBeyondEmptyPrintsUnderflow) {
     // Top should remain -1 (underflow should not corrupt state)
     EXPECT_EQ(*top, -1) << "Top should stay -1 after underflow";
 }
+
+// Test: Display on empty stack prints underflow
+TEST_F(ArrayStackTest, DisplayEmptyStackPrintsUnderflow) {
+    testing::internal::CaptureStdout();
+    display(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
+        << "Should print 'Stack Underflow' when displaying empty stack";
+}
+
+// Test: Push 1, pop 1, display should print underflow
+TEST_F(ArrayStackTest, DisplayAfterPushAndPopPrintsUnderflow) {
+    push(arr_stack, arr_size, 42, top);
+    pop(arr_stack, top);
+
+    testing::internal::CaptureStdout();
+    display(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
+        << "Should print 'Stack Underflow' after pushing and popping 1 element";
+}
+
+// Test: Push max elements, display should show all elements
+TEST_F(ArrayStackTest, DisplayFullStackShowsAllElements) {
+    for (int i = 0; i < arr_size; i++) {
+        push(arr_stack, arr_size, i * 10, top);
+    }
+
+    testing::internal::CaptureStdout();
+    display(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack elements:"), std::string::npos)
+        << "Should print 'Stack elements:' header";
+
+    for (int i = 0; i < arr_size; i++) {
+        EXPECT_NE(output.find(std::to_string(i * 10)), std::string::npos)
+            << "Should display element " << (i * 10);
+    }
+}
+
+// Test: Push 2 elements, pop 1, display should show the remaining 1 element
+TEST_F(ArrayStackTest, DisplayAfterPopShowsRemainingElement) {
+    push(arr_stack, arr_size, 10, top);
+    push(arr_stack, arr_size, 20, top);
+    pop(arr_stack, top);
+
+    testing::internal::CaptureStdout();
+    display(arr_stack, top);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack elements:"), std::string::npos)
+        << "Should print 'Stack elements:' header";
+    EXPECT_NE(output.find("10"), std::string::npos)
+        << "Should display remaining element 10";
+    EXPECT_EQ(output.find("20"), std::string::npos)
+        << "Should not display popped element 20";
+}

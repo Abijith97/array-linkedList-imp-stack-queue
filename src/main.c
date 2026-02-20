@@ -29,7 +29,7 @@ int main() {
                 pop(arr_stack, &top);
                 break;
             case 3:
-                display(arr_stack, arr_size, &top);
+                display(arr_stack, &top);
                 break;
             case 4:
                 free(arr_stack);
