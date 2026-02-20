@@ -1,25 +1,20 @@
 name: Auto Code Review with Claude
 
 on:
-  workflow_run:
-    workflows: ["Run Google Tests"]
-    types: [completed]
+  workflow_call:
 
 permissions:
   pull-requests: write
   contents: read
-  actions: read
 
 jobs:
   code-review:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,15 +26,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          HEAD_BRANCH="${{ github.event.workflow_run.head_branch }}"
-
-          PR_NUM=$(gh pr list --head "$HEAD_BRANCH" --json number -q '.[0].number')
-          if [ -z "$PR_NUM" ]; then
-            echo "No open PR for branch $HEAD_BRANCH, skipping."
-            exit 0
-          fi
-
-          BASE_BRANCH=$(gh pr view $PR_NUM --json baseRefName -q .baseRefName)
+          PR_NUM="${{ github.event.pull_request.number }}"
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
 
           git fetch origin $BASE_BRANCH
           DIFF=$(git diff origin/$BASE_BRANCH...HEAD)

@@ -1,0 +1,14 @@
+name: PR Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  code-review:
+    needs: tests
+    uses: ./.github/workflows/auto-code-review.yml
+    secrets: inherit
