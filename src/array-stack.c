@@ -22,7 +22,7 @@ void pop(int *arr_stack, int *top) {
     }
 }
 
-void display(int *arr_stack, int arr_size, int *top) {
+void display(int *arr_stack, int *top) {
     if(*top == -1){
         printf("Stack Underflow\n");
     }
