@@ -196,7 +196,7 @@ TEST_F(ArrayStackTest, PopBeyondEmptyPrintsUnderflow) {
 // Test: Display on empty stack prints underflow
 TEST_F(ArrayStackTest, DisplayEmptyStackPrintsUnderflow) {
     testing::internal::CaptureStdout();
-    display(arr_stack, arr_size, top);
+    display(arr_stack, top);
     std::string output = testing::internal::GetCapturedStdout();
 
     EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
@@ -209,7 +209,7 @@ TEST_F(ArrayStackTest, DisplayAfterPushAndPopPrintsUnderflow) {
     pop(arr_stack, top);
 
     testing::internal::CaptureStdout();
-    display(arr_stack, arr_size, top);
+    display(arr_stack, top);
     std::string output = testing::internal::GetCapturedStdout();
 
     EXPECT_NE(output.find("Stack Underflow"), std::string::npos)
@@ -223,7 +223,7 @@ TEST_F(ArrayStackTest, DisplayFullStackShowsAllElements) {
     }
 
     testing::internal::CaptureStdout();
-    display(arr_stack, arr_size, top);
+    display(arr_stack, top);
     std::string output = testing::internal::GetCapturedStdout();
 
     EXPECT_NE(output.find("Stack elements:"), std::string::npos)
@@ -242,7 +242,7 @@ TEST_F(ArrayStackTest, DisplayAfterPopShowsRemainingElement) {
     pop(arr_stack, top);
 
     testing::internal::CaptureStdout();
-    display(arr_stack, arr_size, top);
+    display(arr_stack, top);
     std::string output = testing::internal::GetCapturedStdout();
 
     EXPECT_NE(output.find("Stack elements:"), std::string::npos)
