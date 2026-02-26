@@ -17,17 +17,26 @@ set(SOURCES
     src/array-stack.c
 )
 
+set(LL_SOURCES
+    src/linkedlist-stack.c
+)
+
 # Create a library from source files
 add_library(array_stack ${SOURCES})
+add_library(linkedlist_stack ${LL_SOURCES})
 
 # Target include directories for the library
 target_include_directories(array_stack PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_include_directories(linkedlist_stack PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # Optional: Create a simple demo executable
 add_executable(demo src/main.c)
-target_link_libraries(demo array_stack)
+target_link_libraries(demo array_stack linkedlist_stack)
 
 # Google Test setup
 include(FetchContent)
