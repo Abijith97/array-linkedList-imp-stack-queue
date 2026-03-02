@@ -65,3 +65,17 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(array_stack_test)
+
+# Linked-list stack test executable
+add_executable(
+  linkedlist_stack_test
+  tests/test_linkedlist_stack.cpp
+)
+
+target_link_libraries(
+  linkedlist_stack_test
+  linkedlist_stack
+  GTest::gtest_main
+)
+
+gtest_discover_tests(linkedlist_stack_test)
