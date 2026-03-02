@@ -78,4 +78,7 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+# Wrap malloc to allow allocation-failure injection in tests
+target_link_options(linkedlist_stack_test PRIVATE -Wl,--wrap=malloc)
+
 gtest_discover_tests(linkedlist_stack_test)
