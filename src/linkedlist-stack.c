@@ -27,7 +27,7 @@ void ll_push(struct node **top, int new_data)
     }
     else {
         new_node->next = *top;
-        *top = new_node;
+        new_node = *top;
     }
 
     printf("Pushed %d to stack\n", new_data);
