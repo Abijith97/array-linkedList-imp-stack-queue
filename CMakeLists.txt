@@ -17,17 +17,26 @@ set(SOURCES
     src/array-stack.c
 )
 
+set(LL_SOURCES
+    src/linkedlist-stack.c
+)
+
 # Create a library from source files
 add_library(array_stack ${SOURCES})
+add_library(linkedlist_stack ${LL_SOURCES})
 
 # Target include directories for the library
 target_include_directories(array_stack PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_include_directories(linkedlist_stack PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # Optional: Create a simple demo executable
 add_executable(demo src/main.c)
-target_link_libraries(demo array_stack)
+target_link_libraries(demo array_stack linkedlist_stack)
 
 # Google Test setup
 include(FetchContent)
@@ -56,3 +65,20 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(array_stack_test)
+
+# Linked-list stack test executable
+add_executable(
+  linkedlist_stack_test
+  tests/test_linkedlist_stack.cpp
+)
+
+target_link_libraries(
+  linkedlist_stack_test
+  linkedlist_stack
+  GTest::gtest_main
+)
+
+# Wrap malloc to allow allocation-failure injection in tests
+target_link_options(linkedlist_stack_test PRIVATE -Wl,--wrap=malloc)
+
+gtest_discover_tests(linkedlist_stack_test)
