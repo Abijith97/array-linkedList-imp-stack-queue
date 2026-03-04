@@ -40,7 +40,7 @@ void ll_pop(struct node **top);
 /**
  * @brief Display all elements of the linked-list stack from top to bottom.
  *
- * Prints "Stack Underflow" when the stack is empty.
+ * Prints "Stack is empty" when the stack is empty.
  *
  * @param[in] top Pointer to the top node (read-only traversal).
  */
