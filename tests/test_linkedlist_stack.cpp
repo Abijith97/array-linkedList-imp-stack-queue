@@ -150,3 +150,144 @@ TEST_F(LLPushTest, PushOnMallocFailureLeavesTopUnchanged)
     }
     // guard destructor fires here — malloc restored before GTest cleanup
 }
+
+// ─── LLPop Tests ─────────────────────────────────────────────────────────────
+
+/**
+ * @brief Test fixture for ll_pop.
+ *
+ * Provides a node_count() helper and frees all heap memory in TearDown
+ * to prevent leaks regardless of how many pops each test performed.
+ */
+class LLPopTest : public ::testing::Test {
+protected:
+    struct node *top{nullptr};
+
+    void TearDown() override {
+        struct node *cur = top;
+        while (cur != nullptr) {
+            struct node *next = cur->next;
+            free(cur);
+            cur = next;
+        }
+        top = nullptr;
+    }
+
+    /** @brief Return the number of nodes currently in the stack. */
+    int node_count() const
+    {
+        int count = 0;
+        for (const struct node *cur = top; cur != nullptr; cur = cur->next) {
+            ++count;
+        }
+        return count;
+    }
+};
+
+// Test 8: Pop from empty stack — prints "Stack underflow", top stays NULL
+TEST_F(LLPopTest, PopEmptyStackPrintsUnderflow)
+{
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack underflow"), std::string::npos)
+        << "Expected 'Stack underflow' when popping an empty stack";
+    EXPECT_EQ(top, nullptr) << "top must remain NULL after underflow";
+}
+
+// Test 9: Push 1, pop 1 — output reports the pushed value, stack is empty after
+TEST_F(LLPopTest, PopSingleElementMatchesPushed)
+{
+    testing::internal::CaptureStdout();
+    ll_push(&top, 42);
+    testing::internal::GetCapturedStdout();  // discard push output
+
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Popped 42 from stack"), std::string::npos)
+        << "Pop message must report the pushed value (42)";
+    EXPECT_EQ(top, nullptr) << "Stack must be empty after popping the sole element";
+}
+
+// Test 10: Push 1, 2, 3; pop once — LIFO: value 3 (last pushed) removed, top becomes 2
+TEST_F(LLPopTest, PopReturnsLastPushed)
+{
+    testing::internal::CaptureStdout();
+    ll_push(&top, 1);
+    ll_push(&top, 2);
+    ll_push(&top, 3);
+    testing::internal::GetCapturedStdout();  // discard push output
+
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Popped 3 from stack"), std::string::npos)
+        << "Third pushed value (3) must be the first popped (LIFO)";
+    ASSERT_NE(top, nullptr);
+    EXPECT_EQ(top->data, 2) << "After popping 3, new top must be 2";
+    EXPECT_EQ(node_count(), 2);
+}
+
+// Test 11: Push 3 elements, pop 4 — 4th pop must print "Stack underflow"
+TEST_F(LLPopTest, ExcessivePopTriggersUnderflow)
+{
+    testing::internal::CaptureStdout();
+    ll_push(&top, 1);
+    ll_push(&top, 2);
+    ll_push(&top, 3);
+    testing::internal::GetCapturedStdout();  // discard push output
+
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    ll_pop(&top);
+    ll_pop(&top);
+    testing::internal::GetCapturedStdout();  // discard three valid pops
+
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack underflow"), std::string::npos)
+        << "4th pop on a 3-element stack must report 'Stack underflow'";
+    EXPECT_EQ(top, nullptr);
+}
+
+// Test 12: Push 100 elements (0–99), pop 4 times — 4th pop yields value 96
+//          (the 97th pushed element, 1-indexed), 96 nodes remain.
+//
+// Stack layout after 100 pushes (top → bottom): 99, 98, 97, 96, 95, …, 0
+//   pop 1 → 99  (100th pushed)
+//   pop 2 → 98  ( 99th pushed)
+//   pop 3 → 97  ( 98th pushed)
+//   pop 4 → 96  ( 97th pushed)  ← the target
+TEST_F(LLPopTest, Pop97thPushedElementFromHundredElementStack)
+{
+    testing::internal::CaptureStdout();
+    for (int i = 0; i < 100; ++i) {
+        ll_push(&top, i);
+    }
+    testing::internal::GetCapturedStdout();  // discard push output
+
+    // Discard first 3 pops (values 99, 98, 97).
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    ll_pop(&top);
+    ll_pop(&top);
+    testing::internal::GetCapturedStdout();
+
+    // 4th pop must yield value 96 — the 97th pushed element.
+    testing::internal::CaptureStdout();
+    ll_pop(&top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Popped 96 from stack"), std::string::npos)
+        << "4th pop must yield 96, the 97th pushed element (1-indexed)";
+    EXPECT_EQ(node_count(), 96)
+        << "96 nodes must remain after 4 pops on a 100-element stack";
+    ASSERT_NE(top, nullptr);
+    EXPECT_EQ(top->data, 95) << "New top must be 95 after popping 96";
+}

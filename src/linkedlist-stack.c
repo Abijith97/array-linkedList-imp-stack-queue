@@ -35,8 +35,15 @@ void ll_push(struct node **top, int new_data)
 
 void ll_pop(struct node **top)
 {
-    /* TODO: implement pop */
-    (void)top;
+    if (*top == NULL) {
+        printf("Stack underflow\n");
+        return;
+    }
+
+    struct node *temp = *top;
+    printf("Popped %d from stack\n", temp->data);
+    *top = temp->next;
+    free(temp);
 }
 
 void ll_display(struct node *top)
