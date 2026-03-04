@@ -191,8 +191,8 @@ TEST_F(LLPopTest, PopEmptyStackPrintsUnderflow)
     ll_pop(&top);
     const std::string output = testing::internal::GetCapturedStdout();
 
-    EXPECT_NE(output.find("Stack underflow"), std::string::npos)
-        << "Expected 'Stack underflow' when popping an empty stack";
+    EXPECT_NE(output.find("Stack is empty"), std::string::npos)
+        << "Expected 'Stack is empty' when popping an empty stack";
     EXPECT_EQ(top, nullptr) << "top must remain NULL after underflow";
 }
 
@@ -251,8 +251,8 @@ TEST_F(LLPopTest, ExcessivePopTriggersUnderflow)
     ll_pop(&top);
     const std::string output = testing::internal::GetCapturedStdout();
 
-    EXPECT_NE(output.find("Stack underflow"), std::string::npos)
-        << "4th pop on a 3-element stack must report 'Stack underflow'";
+    EXPECT_NE(output.find("Stack is empty"), std::string::npos)
+        << "4th pop on a 3-element stack must report 'Stack is empty'";
     EXPECT_EQ(top, nullptr);
 }
 
@@ -290,4 +290,102 @@ TEST_F(LLPopTest, Pop97thPushedElementFromHundredElementStack)
         << "96 nodes must remain after 4 pops on a 100-element stack";
     ASSERT_NE(top, nullptr);
     EXPECT_EQ(top->data, 95) << "New top must be 95 after popping 96";
+}
+
+// ─── LLDisplay Tests ─────────────────────────────────────────────────────────
+
+/**
+ * @brief Test fixture for ll_display.
+ *
+ * Identical setup/teardown to LLPopTest; kept separate to isolate display
+ * concerns and allow independent evolution of each fixture.
+ */
+class LLDisplayTest : public ::testing::Test {
+protected:
+    struct node *top{nullptr};
+
+    void TearDown() override {
+        struct node *cur = top;
+        while (cur != nullptr) {
+            struct node *next = cur->next;
+            free(cur);
+            cur = next;
+        }
+        top = nullptr;
+    }
+};
+
+// Test 13: Display empty stack — prints "Stack is empty"
+TEST_F(LLDisplayTest, DisplayEmptyStackPrintsEmpty)
+{
+    testing::internal::CaptureStdout();
+    ll_display(top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack is empty"), std::string::npos)
+        << "Expected 'Stack is empty' when displaying an empty stack";
+}
+
+// Test 14: Push 1, pop 1, display — stack is empty, prints "Stack is empty"
+TEST_F(LLDisplayTest, DisplayAfterPushPopPrintsEmpty)
+{
+    testing::internal::CaptureStdout();
+    ll_push(&top, 42);
+    ll_pop(&top);
+    testing::internal::GetCapturedStdout();  // discard push/pop output
+
+    testing::internal::CaptureStdout();
+    ll_display(top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_NE(output.find("Stack is empty"), std::string::npos)
+        << "Expected 'Stack is empty' after pushing and popping the sole element";
+}
+
+// Test 15: Push 1, 2, 3; pop 1 — display shows 2 then 1 (top to bottom)
+TEST_F(LLDisplayTest, DisplayThreePushOnePopShowsTopToBottom)
+{
+    testing::internal::CaptureStdout();
+    ll_push(&top, 1);
+    ll_push(&top, 2);
+    ll_push(&top, 3);
+    ll_pop(&top);
+    testing::internal::GetCapturedStdout();  // discard push/pop output
+
+    // Stack: 2(top) → 1 → NULL
+    testing::internal::CaptureStdout();
+    ll_display(top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "2\n1\n")
+        << "Display must print top-to-bottom: 2, then 1";
+}
+
+// Test 16: Push 100 elements (0–99), pop 4 — display 96 elements (95 down to 0)
+//
+// Stack after 4 pops (top → bottom): 95, 94, …, 1, 0
+TEST_F(LLDisplayTest, DisplayAfterHundredPushFourPop)
+{
+    testing::internal::CaptureStdout();
+    for (int i = 0; i < 100; ++i) {
+        ll_push(&top, i);
+    }
+    ll_pop(&top);  // removes 99
+    ll_pop(&top);  // removes 98
+    ll_pop(&top);  // removes 97
+    ll_pop(&top);  // removes 96
+    testing::internal::GetCapturedStdout();  // discard push/pop output
+
+    // Build expected output: "95\n94\n…\n1\n0\n"
+    std::string expected;
+    for (int i = 95; i >= 0; --i) {
+        expected += std::to_string(i) + "\n";
+    }
+
+    testing::internal::CaptureStdout();
+    ll_display(top);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, expected)
+        << "Display must print 96 elements from 95 (top) down to 0 (bottom)";
 }

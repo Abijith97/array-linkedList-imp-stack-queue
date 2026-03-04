@@ -36,7 +36,7 @@ void ll_push(struct node **top, int new_data)
 void ll_pop(struct node **top)
 {
     if (*top == NULL) {
-        printf("Stack underflow\n");
+        printf("Stack is empty\n");
         return;
     }
 
@@ -48,6 +48,12 @@ void ll_pop(struct node **top)
 
 void ll_display(struct node *top)
 {
-    /* TODO: implement display */
-    (void)top;
+    if (top == NULL) {
+        printf("Stack is empty\n");
+        return;
+    }
+
+    for (const struct node *temp = top; temp != NULL; temp = temp->next) {
+        printf("%d\n", temp->data);
+    }
 }
