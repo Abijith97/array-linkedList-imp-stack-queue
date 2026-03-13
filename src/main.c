@@ -3,6 +3,7 @@
 #include "linkedlist-stack.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 static void run_array_stack(void)
 {
