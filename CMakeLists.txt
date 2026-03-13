@@ -21,9 +21,14 @@ set(LL_SOURCES
     src/linkedlist-stack.c
 )
 
+set(CB_SOURCES
+    src/circularbuffer-queue.c
+)
+
 # Create a library from source files
 add_library(array_stack ${SOURCES})
 add_library(linkedlist_stack ${LL_SOURCES})
+add_library(circularbuffer_queue ${CB_SOURCES})
 
 # Target include directories for the library
 target_include_directories(array_stack PUBLIC
@@ -34,9 +39,13 @@ target_include_directories(linkedlist_stack PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_include_directories(circularbuffer_queue PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # Optional: Create a simple demo executable
 add_executable(demo src/main.c)
-target_link_libraries(demo array_stack linkedlist_stack)
+target_link_libraries(demo array_stack linkedlist_stack circularbuffer_queue)
 
 # Google Test setup
 include(FetchContent)

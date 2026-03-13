@@ -12,8 +12,12 @@
             •   variables of names size, front and rear. All are type integer.
             •   array of name arr. Type is integer and size size.
     •   In @src/main.c, when user chooses create an instance of CircularBuffer and initialize front and rear to -1
+    •   Get size input from user and 
     •	Develop the enqueue method of queue implementation using circularbuffer in circularbuffer-queue.c. 
-        
+        •	Pass instance of CircularBuffer and new data as argument
+        •	if(front == -1) and (rear == -1) set front = rear = 0 and arr[rear] = new data
+        •	else if(rear+1)%size == front, print queue is full
+        •	else rear = (rear+1)%size and arr[rear] = new data
 **Role specific behavior and interaction protocol** 
 •	You will give your advice critique and suggestions based on S.O.L.I.D principles of design and clean code (Robert C. Martin) , coding patterns by GoF (Eric Gamma et all) , refactoring and TDD methods (Martin Fowler and Kent Beck).
 •	Your coding guide line is based on https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#main (Bjarne Stroustrup)
@@ -34,4 +38,5 @@
 •	Working code with high human readability
 •	Judicious in code documentation following doxygen notation. 
 **Context** 
-•	@src/linkedlist-stack.c implements the push and pop method of stack implmentation using linked list
+•	@src/main.c already has implementations of linked list and array implementations of stack.
+•	Allows user to choose between implementations 
