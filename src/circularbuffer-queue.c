@@ -10,20 +10,21 @@
 #include "circularbuffer-queue.h"
 #include <stdio.h>
 
-void cb_enqueue(CircularBuffer *cb, int data)
-{
-    if (cb->front == -1 && cb->rear == -1) {
-        cb->front         = 0;
-        cb->rear          = 0;
-        cb->arr[cb->rear] = data;
-        printf("Enqueued %d\n", data);
-    }
-    else if ((cb->rear + 1) % cb->size == cb->front) {
+void cb_enqueue(CircularBuffer *cb, int data) {
+    if (cb == NULL || cb->arr == NULL) return;
+    
+    if (cb->count >= cb->size) {
         printf("Queue is full\n");
+        return;
     }
-    else {
-        cb->rear          = (cb->rear + 1) % cb->size;
-        cb->arr[cb->rear] = data;
-        printf("Enqueued %d\n", data);
+    
+    if (cb->count == 0) {
+        cb->front = cb->rear = 0;
+    } else {
+        cb->rear = (cb->rear + 1) % cb->size;
     }
+    
+    cb->arr[cb->rear] = data;
+    cb->count++;
+    printf("Enqueued %d\n", data);
 }
