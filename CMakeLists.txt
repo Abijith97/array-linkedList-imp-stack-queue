@@ -91,3 +91,17 @@ target_link_libraries(
 target_link_options(linkedlist_stack_test PRIVATE -Wl,--wrap=malloc)
 
 gtest_discover_tests(linkedlist_stack_test)
+
+# Circular-buffer queue test executable
+add_executable(
+  circularbuffer_queue_test
+  tests/test_circularbuffer_queue.cpp
+)
+
+target_link_libraries(
+  circularbuffer_queue_test
+  circularbuffer_queue
+  GTest::gtest_main
+)
+
+gtest_discover_tests(circularbuffer_queue_test)
