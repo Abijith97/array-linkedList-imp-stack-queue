@@ -3,7 +3,6 @@
 #include "linkedlist-stack.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
 static void run_array_stack(void)
 {
@@ -58,11 +57,6 @@ static void run_circularbuffer_queue(void)
         printf("Memory allocation failed\n");
         return;
     }
-    if (cb_size > INT_MAX / sizeof(int)) {
-        printf("Size too large\n");
-        free(cb);
-        return;
-    }
     cb->arr = (int *)malloc((size_t)cb_size * sizeof(int));
     if (cb->arr == NULL) {
         printf("Memory allocation failed\n");
@@ -72,7 +66,6 @@ static void run_circularbuffer_queue(void)
     cb->size  = cb_size;
     cb->front = -1;
     cb->rear  = -1;
-    cb->count = 0;
 
     while (1) {
         int choice, value;
@@ -100,13 +93,7 @@ static void run_linkedlist_stack(void)
     while (1) {
         int choice, value;
         printf("1. Push\n2. Pop\n3. Display\n4. Exit\nEnter your choice: ");
-        if (scanf("%d", &choice) != 1) {
-            printf("Invalid input\n");
-            // Clear input buffer
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF);
-            continue;
-        }
+        scanf("%d", &choice);
         switch (choice) {
             case 1:
                 printf("Enter value to push: ");
