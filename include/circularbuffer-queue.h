@@ -2,13 +2,13 @@
  * @file circularbuffer-queue.h
  * @brief Queue implementation using a circular buffer.
  *
- * The CircularBuffer struct uses a C99 flexible array member so that a single
- * heap allocation covers both the control block and the data array.  Callers
- * must allocate with:
+ * The CircularBuffer struct uses a pointer member for its storage ring.
+ * Callers must perform two allocations and initialise all fields:
  *
- *   CircularBuffer *cb = malloc(sizeof(CircularBuffer) + size * sizeof(int));
+ *   CircularBuffer *cb = malloc(sizeof(CircularBuffer));
+ *   cb->arr            = malloc(size * sizeof(int));
  *
- * and initialise all fields before calling any function.
+ * and issue two matching frees (arr first, then the control block).
  */
 
 #ifndef CIRCULARBUFFER_QUEUE_H
@@ -42,5 +42,20 @@ typedef struct {
  * @param[in]     data Integer value to enqueue.
  */
 void cb_enqueue(CircularBuffer *cb, int data);
+
+/**
+ * @brief Dequeue the front element from the circular-buffer queue.
+ *
+ * Removal policy:
+ *  - If @c front == -1 and @c rear == -1 the queue is empty: print
+ *    "Queue is empty" and return without modifying the queue.
+ *  - Else if @c front == rear only one element remains: print the
+ *    dequeued value and reset front = rear = -1 (sentinel empty state).
+ *  - Otherwise print the dequeued value and advance
+ *    front = (front + 1) % size.
+ *
+ * @param[in,out] cb Pointer to an initialised CircularBuffer.
+ */
+void cb_dequeue(CircularBuffer *cb);
 
 #endif /* CIRCULARBUFFER_QUEUE_H */
