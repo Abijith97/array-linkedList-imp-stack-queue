@@ -27,3 +27,19 @@ void cb_enqueue(CircularBuffer *cb, int data)
         printf("Enqueued %d\n", data);
     }
 }
+
+void cb_dequeue(CircularBuffer *cb)
+{
+    if (cb->front == -1 && cb->rear == -1) {
+        printf("Queue is empty\n");
+    }
+    else if (cb->front == cb->rear) {
+        printf("Dequeued %d\n", cb->arr[cb->front]);
+        cb->front = -1;
+        cb->rear  = -1;
+    }
+    else {
+        printf("Dequeued %d\n", cb->arr[cb->front]);
+        cb->front = (cb->front + 1) % cb->size;
+    }
+}

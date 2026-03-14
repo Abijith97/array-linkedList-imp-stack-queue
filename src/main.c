@@ -69,7 +69,7 @@ static void run_circularbuffer_queue(void)
 
     while (1) {
         int choice, value;
-        printf("1. Enqueue\n2. Exit\nEnter your choice: ");
+        printf("1. Enqueue\n2. Dequeue\n3. Exit\nEnter your choice: ");
         scanf("%d", &choice);
         switch (choice) {
             case 1:
@@ -78,6 +78,9 @@ static void run_circularbuffer_queue(void)
                 cb_enqueue(cb, value);
                 break;
             case 2:
+                cb_dequeue(cb);
+                break;
+            case 3:
                 free(cb->arr);
                 free(cb);
                 return;
