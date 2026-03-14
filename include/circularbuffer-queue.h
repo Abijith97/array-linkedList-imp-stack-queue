@@ -6,7 +6,7 @@
  * heap allocation covers both the control block and the data array.  Callers
  * must allocate with:
  *
- *   CircularBuffer *cb = (CircularBuffer *)malloc(sizeof(CircularBuffer));
+ *   CircularBuffer *cb = malloc(sizeof(CircularBuffer) + size * sizeof(int));
  *
  * and initialise all fields before calling any function.
  */
@@ -25,7 +25,6 @@ typedef struct {
     int  size;  /**< Capacity of the queue (number of slots). */
     int  front; /**< Index of the front element; -1 when empty.  */
     int  rear;  /**< Index of the rear element;  -1 when empty.  */
-    int  count;  // Number of elements
     int *arr;   /**< Pointer to the heap-allocated storage ring. */
 } CircularBuffer;
 
