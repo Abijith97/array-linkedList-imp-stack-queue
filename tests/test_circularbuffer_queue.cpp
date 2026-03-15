@@ -310,3 +310,158 @@ TEST_F(CBDequeueTest, DequeueAfterRefillReturnsSixthEnqueuedElement)
     EXPECT_EQ(output, "Dequeued 6\n")
         << "After refill, first dequeue must return the 6th enqueued element";
 }
+
+// ─── CBDisplayTest ────────────────────────────────────────────────────────────
+
+/**
+ * @brief Test fixture for cb_display.
+ *
+ * Same two-malloc / two-free contract as the other fixtures.
+ */
+class CBDisplayTest : public ::testing::Test {
+protected:
+    CircularBuffer *cb{nullptr};
+
+    void allocate(int size)
+    {
+        cb = static_cast<CircularBuffer *>(malloc(sizeof(CircularBuffer)));
+        ASSERT_NE(cb, nullptr) << "Control-block allocation failed";
+
+        cb->arr = static_cast<int *>(malloc(static_cast<size_t>(size) * sizeof(int)));
+        ASSERT_NE(cb->arr, nullptr) << "Array allocation failed";
+
+        cb->size  = size;
+        cb->front = -1;
+        cb->rear  = -1;
+    }
+
+    void TearDown() override
+    {
+        if (cb != nullptr) {
+            free(cb->arr);
+            free(cb);
+            cb = nullptr;
+        }
+    }
+};
+
+// Test 10: size=5, display empty queue — prints "Queue is empty"
+TEST_F(CBDisplayTest, DisplayEmptyQueuePrintsEmpty)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "Queue is empty\n")
+        << "Expected 'Queue is empty' when displaying an empty queue";
+}
+
+// Test 11: size=5, enqueue 1, dequeue 1, display — prints "Queue is empty"
+TEST_F(CBDisplayTest, DisplayAfterEnqueueDequeueShowsEmpty)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    cb_enqueue(cb, 42);
+    cb_dequeue(cb);
+    testing::internal::GetCapturedStdout();  // discard
+
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "Queue is empty\n")
+        << "Expected 'Queue is empty' after the sole element is dequeued";
+}
+
+// Test 12: size=5, enqueue 1 element, display — prints that element
+TEST_F(CBDisplayTest, DisplaySingleElementShowsValue)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    cb_enqueue(cb, 42);
+    testing::internal::GetCapturedStdout();  // discard
+
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "42\n")
+        << "Display must print the single enqueued element";
+}
+
+// Test 13: size=5, enqueue 5 elements, display — prints all 5 in FIFO order
+TEST_F(CBDisplayTest, DisplayFullQueueShowsAllElementsInOrder)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    for (int i = 1; i <= 5; ++i) {
+        cb_enqueue(cb, i);
+    }
+    testing::internal::GetCapturedStdout();  // discard
+
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "1\n2\n3\n4\n5\n")
+        << "Display must print all 5 elements front-to-rear";
+}
+
+// Test 14: size=5, enqueue 4, dequeue 2, display — prints the 2 remaining elements
+//
+// After dequeuing 1 and 2, front advances to index 2.
+// Remaining elements: 3, 4.
+TEST_F(CBDisplayTest, DisplayAfterPartialDequeueShowsRemainder)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    for (int i = 1; i <= 4; ++i) {
+        cb_enqueue(cb, i);
+    }
+    cb_dequeue(cb);  // removes 1
+    cb_dequeue(cb);  // removes 2
+    testing::internal::GetCapturedStdout();  // discard
+
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "3\n4\n")
+        << "Display must print the 2 remaining elements after 2 dequeues";
+}
+
+// Test 15: size=5, enqueue 5, dequeue 3, enqueue 2 — display prints 4 elements
+//
+// Ring wrap-around: after dequeuing 1,2,3 (front=3) and enqueuing 6,7
+// (rear wraps to index 1), display must traverse the ring correctly:
+// arr[3]=4, arr[4]=5, arr[0]=6, arr[1]=7.
+TEST_F(CBDisplayTest, DisplayAfterWrapAroundShowsAllElements)
+{
+    allocate(5);
+
+    testing::internal::CaptureStdout();
+    for (int i = 1; i <= 5; ++i) {
+        cb_enqueue(cb, i);
+    }
+    cb_dequeue(cb);  // removes 1  → front=1
+    cb_dequeue(cb);  // removes 2  → front=2
+    cb_dequeue(cb);  // removes 3  → front=3
+    cb_enqueue(cb, 6);  // rear=(4+1)%5=0, arr[0]=6
+    cb_enqueue(cb, 7);  // rear=(0+1)%5=1, arr[1]=7
+    testing::internal::GetCapturedStdout();  // discard
+
+    // Ring state: front=3, rear=1
+    // Traversal: arr[3]=4, arr[4]=5, arr[0]=6, arr[1]=7
+    testing::internal::CaptureStdout();
+    cb_display(cb);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "4\n5\n6\n7\n")
+        << "Display must correctly traverse the ring wrap-around";
+}

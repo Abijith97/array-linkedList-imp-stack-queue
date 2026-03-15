@@ -58,4 +58,17 @@ void cb_enqueue(CircularBuffer *cb, int data);
  */
 void cb_dequeue(CircularBuffer *cb);
 
+/**
+ * @brief Display all elements in the circular-buffer queue (front to rear).
+ *
+ * Traversal policy:
+ *  - If @c front == -1 and @c rear == -1 the queue is empty: print
+ *    "Queue is empty".
+ *  - Otherwise walk from @c front to @c rear using ring arithmetic
+ *    ( i = (i + 1) % size ) and print each element on its own line.
+ *
+ * @param[in] cb Pointer to an initialised CircularBuffer.
+ */
+void cb_display(const CircularBuffer *cb);
+
 #endif /* CIRCULARBUFFER_QUEUE_H */

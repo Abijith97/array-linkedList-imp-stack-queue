@@ -43,3 +43,18 @@ void cb_dequeue(CircularBuffer *cb)
         cb->front = (cb->front + 1) % cb->size;
     }
 }
+
+void cb_display(const CircularBuffer *cb)
+{
+    if (cb->front == -1 && cb->rear == -1) {
+        printf("Queue is empty\n");
+        return;
+    }
+
+    int i = cb->front;
+    while (i != cb->rear) {
+        printf("%d\n", cb->arr[i]);
+        i = (i + 1) % cb->size;
+    }
+    printf("%d\n", cb->arr[cb->rear]);
+}
