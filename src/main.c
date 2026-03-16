@@ -1,6 +1,7 @@
 #include "array-stack.h"
 #include "circularbuffer-queue.h"
 #include "linkedlist-stack.h"
+#include "singlylinkedlist-queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -120,10 +121,38 @@ static void run_linkedlist_stack(void)
     }
 }
 
+static void run_singlylinkedlist_queue(void)
+{
+    SinglyLinkedList *head = NULL;
+    while (1) {
+        int choice, value;
+        printf("1. Enqueue\n2. Exit\nEnter your choice: ");
+        scanf("%d", &choice);
+        switch (choice) {
+            case 1:
+                printf("Enter value to enqueue: ");
+                scanf("%d", &value);
+                sll_enqueue(&head, value);
+                break;
+            case 2: {
+                SinglyLinkedList *cur = head;
+                while (cur != NULL) {
+                    SinglyLinkedList *next = cur->next;
+                    free(cur);
+                    cur = next;
+                }
+                return;
+            }
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+}
+
 int main(void)
 {
     int impl_choice;
-    printf("Select implementation:\n1. Array Stack\n2. Linked List Stack\n3. Circular Buffer Queue\nEnter your choice: ");
+    printf("Select implementation:\n1. Array Stack\n2. Linked List Stack\n3. Circular Buffer Queue\n4. Singly Linked List Queue\nEnter your choice: ");
     if (scanf("%d", &impl_choice) != 1) {
         printf("Invalid input\n");
         return 1;
@@ -137,6 +166,9 @@ int main(void)
             break;
         case 3:
             run_circularbuffer_queue();
+            break;
+        case 4:
+            run_singlylinkedlist_queue();
             break;
         default:
             printf("Invalid choice\n");
