@@ -114,3 +114,20 @@ target_link_libraries(
 )
 
 gtest_discover_tests(circularbuffer_queue_test)
+
+# Singly-linked list queue test executable
+add_executable(
+  singlylinkedlist_queue_test
+  tests/test_singlylinkedlist_queue.cpp
+)
+
+target_link_libraries(
+  singlylinkedlist_queue_test
+  singlylinkedlist_queue
+  GTest::gtest_main
+)
+
+# Wrap malloc to allow allocation-failure injection in tests
+target_link_options(singlylinkedlist_queue_test PRIVATE -Wl,--wrap=malloc)
+
+gtest_discover_tests(singlylinkedlist_queue_test)
