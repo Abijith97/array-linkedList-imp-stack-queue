@@ -30,4 +30,14 @@ typedef struct SinglyLinkedList {
  */
 void sll_enqueue(SinglyLinkedList **head, int data);
 
+/**
+ * @brief Dequeue an integer from the head of the linked-list queue.
+ *
+ * Removes the front node (O(1)), frees its memory, and updates @c *head.
+ * Prints "Queue is empty" when called on an empty queue.
+ *
+ * @param[in,out] head Address of the caller's head pointer.
+ */
+void sll_dequeue(SinglyLinkedList **head);
+
 #endif /* SINGLYLINKEDLIST_QUEUE_H */

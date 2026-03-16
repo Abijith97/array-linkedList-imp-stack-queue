@@ -29,3 +29,16 @@ void sll_enqueue(SinglyLinkedList **head, int data)
     }
     printf("Enqueued %d\n", data);
 }
+
+void sll_dequeue(SinglyLinkedList **head)
+{
+    if (*head == NULL) {
+        printf("Queue is empty\n");
+        return;
+    }
+
+    SinglyLinkedList *temp = *head;
+    *head = (*head)->next;
+    printf("Dequeued %d from queue\n", temp->data);
+    free(temp);
+}
