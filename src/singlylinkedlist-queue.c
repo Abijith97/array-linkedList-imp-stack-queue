@@ -42,3 +42,15 @@ void sll_dequeue(SinglyLinkedList **head)
     printf("Dequeued %d from queue\n", temp->data);
     free(temp);
 }
+
+void sll_display(SinglyLinkedList *head)
+{
+    if (head == NULL) {
+        printf("Queue is empty\n");
+        return;
+    }
+
+    for (const SinglyLinkedList *temp = head; temp != NULL; temp = temp->next) {
+        printf("%d\n", temp->data);
+    }
+}

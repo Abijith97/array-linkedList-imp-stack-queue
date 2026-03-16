@@ -126,7 +126,7 @@ static void run_singlylinkedlist_queue(void)
     SinglyLinkedList *head = NULL;
     while (1) {
         int choice, value;
-        printf("1. Enqueue\n2. Dequeue\n3. Exit\nEnter your choice: ");
+        printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\nEnter your choice: ");
         scanf("%d", &choice);
         switch (choice) {
             case 1:
@@ -137,7 +137,10 @@ static void run_singlylinkedlist_queue(void)
             case 2:
                 sll_dequeue(&head);
                 break;
-            case 3: {
+            case 3:
+                sll_display(head);
+                break;
+            case 4: {
                 SinglyLinkedList *cur = head;
                 while (cur != NULL) {
                     SinglyLinkedList *next = cur->next;

@@ -40,4 +40,14 @@ void sll_enqueue(SinglyLinkedList **head, int data);
  */
 void sll_dequeue(SinglyLinkedList **head);
 
+/**
+ * @brief Display all elements of the linked-list queue from head to tail.
+ *
+ * Traverses the list from front to back and prints each element's data.
+ * Prints "Queue is empty" when called on an empty queue.
+ *
+ * @param[in] head Pointer to the head node (read-only traversal).
+ */
+void sll_display(SinglyLinkedList *head);
+
 #endif /* SINGLYLINKEDLIST_QUEUE_H */
