@@ -633,6 +633,362 @@ TEST_F(SLLDequeueTest, DequeueAllHundredElements_QueueBecomesEmpty)
 
 // ─── Interleaved enqueue / dequeue ───────────────────────────────────────────
 
+// ─── SLLDisplay fixture ───────────────────────────────────────────────────────
+
+/**
+ * @brief Test fixture for sll_display.
+ *
+ * Provides enqueue_values() builder, node_count() structural helper, and
+ * build_expected_output() to generate the exact stdout string expected for a
+ * given sequence of values.  TearDown frees all nodes regardless of whether
+ * any dequeue was performed.
+ */
+class SLLDisplayTest : public ::testing::Test {
+protected:
+    SinglyLinkedList *head{nullptr};
+
+    void TearDown() override {
+        SinglyLinkedList *cur = head;
+        while (cur != nullptr) {
+            SinglyLinkedList *next = cur->next;
+            free(cur);
+            cur = next;
+        }
+        head = nullptr;
+    }
+
+    /** @brief Return the number of nodes currently in the list. */
+    int node_count() const
+    {
+        int count = 0;
+        for (const SinglyLinkedList *cur = head; cur != nullptr; cur = cur->next) {
+            ++count;
+        }
+        return count;
+    }
+
+    /** @brief Test-data builder: enqueue values in order, discarding stdout. */
+    void enqueue_values(std::initializer_list<int> values)
+    {
+        testing::internal::CaptureStdout();
+        for (int v : values) {
+            sll_enqueue(&head, v);
+        }
+        testing::internal::GetCapturedStdout();
+    }
+
+    /**
+     * @brief Build the exact stdout string expected from sll_display for the
+     *        given ordered sequence of values (head → tail).
+     *
+     * Each value is formatted as "%d\n", matching printf("%d\n", temp->data).
+     */
+    static std::string build_expected_output(std::initializer_list<int> values)
+    {
+        std::string expected;
+        for (int v : values) {
+            expected += std::to_string(v) + "\n";
+        }
+        return expected;
+    }
+};
+
+// ─── Empty queue ──────────────────────────────────────────────────────────────
+
+// Test 29: Display on empty queue — prints "Queue is empty"
+TEST_F(SLLDisplayTest, DisplayEmptyQueue_PrintsQueueIsEmpty)
+{
+    // Arrange: head == nullptr (fixture default)
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, "Queue is empty\n")
+        << "Exact output must be 'Queue is empty\\n' for an empty queue";
+}
+
+// Test 30: Display on empty queue — head remains NULL (display is non-destructive)
+TEST_F(SLLDisplayTest, DisplayEmptyQueue_HeadRemainsNull)
+{
+    // Arrange
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(head, nullptr)
+        << "head must remain NULL after displaying an empty queue";
+}
+
+// ─── Single-element queue ─────────────────────────────────────────────────────
+
+// Test 31: Display single element — output is exactly "<value>\n"
+TEST_F(SLLDisplayTest, DisplaySingleElement_OutputExactValue)
+{
+    // Arrange
+    enqueue_values({42});
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, "42\n")
+        << "Single-element display must output exactly '42\\n'";
+}
+
+// Test 32: Display single element — list structure unchanged (non-destructive)
+TEST_F(SLLDisplayTest, DisplaySingleElement_ListUnchangedAfterDisplay)
+{
+    // Arrange
+    enqueue_values({42});
+    const int count_before = node_count();
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(node_count(), count_before)
+        << "Node count must be unchanged after display";
+    ASSERT_NE(head, nullptr);
+    EXPECT_EQ(head->data, 42)
+        << "head->data must be unchanged after display";
+}
+
+// ─── Multi-element queue — FIFO output order ──────────────────────────────────
+
+// Test 33: Display two elements — output is head-to-tail (FIFO) order
+TEST_F(SLLDisplayTest, DisplayTwoElements_OutputInFIFOOrder)
+{
+    // Arrange: head(10) → 20(tail)
+    enqueue_values({10, 20});
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, build_expected_output({10, 20}))
+        << "Two-element display must print head first: '10\\n20\\n'";
+}
+
+// Test 34: Display three elements — strict FIFO output order (1 → 2 → 3)
+TEST_F(SLLDisplayTest, DisplayThreeElements_StrictFIFOOutputOrder)
+{
+    // Arrange
+    enqueue_values({1, 2, 3});
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, build_expected_output({1, 2, 3}))
+        << "Three-element display must print in enqueue order: '1\\n2\\n3\\n'";
+}
+
+// Test 35: Display three elements — list structure unchanged after display
+TEST_F(SLLDisplayTest, DisplayThreeElements_ListUnchangedAfterDisplay)
+{
+    // Arrange
+    enqueue_values({1, 2, 3});
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    testing::internal::GetCapturedStdout();
+
+    // Assert: verify head, middle, and tail are intact
+    ASSERT_NE(head, nullptr);
+    EXPECT_EQ(head->data,             1) << "head->data must be unchanged";
+    EXPECT_EQ(head->next->data,       2) << "middle node must be unchanged";
+    EXPECT_EQ(head->next->next->data, 3) << "tail->data must be unchanged";
+    EXPECT_EQ(head->next->next->next, nullptr) << "tail->next must remain NULL";
+}
+
+// ─── Boundary values ─────────────────────────────────────────────────────────
+
+// Test 36: Display negative value — printed correctly
+TEST_F(SLLDisplayTest, DisplayNegativeValue_PrintedCorrectly)
+{
+    enqueue_values({-42});
+    testing::internal::CaptureStdout();
+
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "-42\n")
+        << "Negative value must be printed correctly";
+}
+
+// Test 37: Display zero — printed correctly
+TEST_F(SLLDisplayTest, DisplayZero_PrintedCorrectly)
+{
+    enqueue_values({0});
+    testing::internal::CaptureStdout();
+
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "0\n")
+        << "Zero must be printed correctly";
+}
+
+// Test 38: Display INT_MAX then INT_MIN — both boundary values in correct order
+TEST_F(SLLDisplayTest, DisplayIntMaxThenIntMin_BothPrintedInOrder)
+{
+    enqueue_values({INT_MAX, INT_MIN});
+    testing::internal::CaptureStdout();
+
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    const std::string expected = std::to_string(INT_MAX) + "\n"
+                               + std::to_string(INT_MIN) + "\n";
+    EXPECT_EQ(output, expected)
+        << "INT_MAX and INT_MIN must both appear in enqueue order";
+}
+
+// ─── Non-destructive / idempotent behaviour ───────────────────────────────────
+
+// Test 39: Display called twice — both calls produce identical output
+TEST_F(SLLDisplayTest, DisplayCalledTwice_OutputIsIdentical)
+{
+    // Arrange
+    enqueue_values({5, 10, 15});
+
+    testing::internal::CaptureStdout();
+    sll_display(head);
+    const std::string first_output = testing::internal::GetCapturedStdout();
+
+    testing::internal::CaptureStdout();
+
+    // Act: second display call
+    sll_display(head);
+    const std::string second_output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(first_output, second_output)
+        << "sll_display must be idempotent: repeated calls produce identical output";
+}
+
+// Test 40: Display after dequeue — shows remaining elements only
+TEST_F(SLLDisplayTest, DisplayAfterDequeue_ShowsOnlyRemainingElements)
+{
+    // Arrange: head(1) → 2 → 3, dequeue removes 1
+    enqueue_values({1, 2, 3});
+    testing::internal::CaptureStdout();
+    sll_dequeue(&head);
+    testing::internal::GetCapturedStdout();
+
+    // Queue is now: head(2) → 3(tail)
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, build_expected_output({2, 3}))
+        << "Display must reflect post-dequeue state: only '2\\n3\\n'";
+    EXPECT_EQ(output.find("1"), std::string::npos)
+        << "Dequeued value (1) must not appear in display output";
+}
+
+// ─── Scale ────────────────────────────────────────────────────────────────────
+
+// Test 41: Display 100 elements (0–99) — all values appear in exact FIFO order
+TEST_F(SLLDisplayTest, Display100Elements_ExactFIFOOutput)
+{
+    // Arrange: build expected string before enqueuing to keep it readable
+    std::string expected;
+    for (int i = 0; i < 100; ++i) {
+        expected += std::to_string(i) + "\n";
+    }
+
+    testing::internal::CaptureStdout();
+    for (int i = 0; i < 100; ++i) {
+        sll_enqueue(&head, i);
+    }
+    testing::internal::GetCapturedStdout();
+
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, expected)
+        << "100-element display must print values 0–99 in enqueue (FIFO) order";
+}
+
+// Test 42: Display 100 elements — list count unchanged after display (non-destructive)
+TEST_F(SLLDisplayTest, Display100Elements_NodeCountUnchangedAfterDisplay)
+{
+    testing::internal::CaptureStdout();
+    for (int i = 0; i < 100; ++i) {
+        sll_enqueue(&head, i);
+    }
+    testing::internal::GetCapturedStdout();
+
+    ASSERT_EQ(node_count(), 100);  // precondition
+
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(node_count(), 100)
+        << "Node count must be 100 after displaying a 100-element queue";
+}
+
+// ─── Interleaved operations ───────────────────────────────────────────────────
+
+// Test 43: Enqueue 5, dequeue 2, enqueue 2 more, display — reflects exact state
+//
+// Timeline:
+//   enqueue 10,20,30,40,50  →  head(10) → 20 → 30 → 40 → 50
+//   dequeue                 →  removes 10, head(20) → 30 → 40 → 50
+//   dequeue                 →  removes 20, head(30) → 40 → 50
+//   enqueue 60, 70          →  head(30) → 40 → 50 → 60 → 70
+//   display                 →  must print: 30, 40, 50, 60, 70
+TEST_F(SLLDisplayTest, DisplayAfterInterleavedOps_ReflectsCurrentQueueState)
+{
+    // Arrange
+    enqueue_values({10, 20, 30, 40, 50});
+    testing::internal::CaptureStdout();
+    sll_dequeue(&head);  // removes 10
+    sll_dequeue(&head);  // removes 20
+    testing::internal::GetCapturedStdout();
+
+    enqueue_values({60, 70});
+    // Queue: head(30) → 40 → 50 → 60 → 70(tail)
+    ASSERT_EQ(node_count(), 5);
+
+    testing::internal::CaptureStdout();
+
+    // Act
+    sll_display(head);
+    const std::string output = testing::internal::GetCapturedStdout();
+
+    // Assert
+    EXPECT_EQ(output, build_expected_output({30, 40, 50, 60, 70}))
+        << "Display must reflect current queue state after interleaved ops";
+}
+
 // Test 28: Enqueue 3, dequeue 2, enqueue 2 more — FIFO order maintained throughout
 //
 // Timeline:
