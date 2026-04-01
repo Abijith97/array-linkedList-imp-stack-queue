@@ -1,3 +1,4 @@
+#include "addition.h"
 #include "array-stack.h"
 #include "circularbuffer-queue.h"
 #include "linkedlist-stack.h"
@@ -155,10 +156,26 @@ static void run_singlylinkedlist_queue(void)
     }
 }
 
+static void run_addition(void)
+{
+    int a, b;
+    printf("Enter first integer: ");
+    if (scanf("%d", &a) != 1) {
+        printf("Invalid input\n");
+        return;
+    }
+    printf("Enter second integer: ");
+    if (scanf("%d", &b) != 1) {
+        printf("Invalid input\n");
+        return;
+    }
+    printf("Result: %d\n", add(a, b));
+}
+
 int main(void)
 {
     int impl_choice;
-    printf("Select implementation:\n1. Array Stack\n2. Linked List Stack\n3. Circular Buffer Queue\n4. Singly Linked List Queue\nEnter your choice: ");
+    printf("Select implementation:\n1. Array Stack\n2. Linked List Stack\n3. Circular Buffer Queue\n4. Singly Linked List Queue\n5. Addition\nEnter your choice: ");
     if (scanf("%d", &impl_choice) != 1) {
         printf("Invalid input\n");
         return 1;
@@ -175,6 +192,9 @@ int main(void)
             break;
         case 4:
             run_singlylinkedlist_queue();
+            break;
+        case 5:
+            run_addition();
             break;
         default:
             printf("Invalid choice\n");

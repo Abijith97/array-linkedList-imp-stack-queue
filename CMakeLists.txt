@@ -29,11 +29,16 @@ set(SLL_SOURCES
     src/singlylinkedlist-queue.c
 )
 
+set(ADD_SOURCES
+    src/addition.c
+)
+
 # Create a library from source files
 add_library(array_stack ${SOURCES})
 add_library(linkedlist_stack ${LL_SOURCES})
 add_library(circularbuffer_queue ${CB_SOURCES})
 add_library(singlylinkedlist_queue ${SLL_SOURCES})
+add_library(addition ${ADD_SOURCES})
 
 # Target include directories for the library
 target_include_directories(array_stack PUBLIC
@@ -52,9 +57,13 @@ target_include_directories(singlylinkedlist_queue PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_include_directories(addition PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # Optional: Create a simple demo executable
 add_executable(demo src/main.c)
-target_link_libraries(demo array_stack linkedlist_stack circularbuffer_queue singlylinkedlist_queue)
+target_link_libraries(demo array_stack linkedlist_stack circularbuffer_queue singlylinkedlist_queue addition)
 
 # Google Test setup
 include(FetchContent)
